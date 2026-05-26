@@ -12,7 +12,7 @@ const TaskForm = ({ isOpen, onClose, onSubmit, isSubmitting }) => {
   const validate = () => {
     const newErrors = {};
     if (!title.trim()) {
-      newErrors.title = 'Title is required';
+      newErrors.title = 'Task title is required';
     } else if (title.trim().length < 3) {
       newErrors.title = 'Title must be at least 3 characters long';
     } else if (title.trim().length > 100) {
@@ -33,7 +33,7 @@ const TaskForm = ({ isOpen, onClose, onSubmit, isSubmitting }) => {
     } else {
       const selectedDate = new Date(dueDate);
       if (selectedDate <= new Date()) {
-        newErrors.dueDate = 'Due date must be a future date on creation';
+        newErrors.dueDate = 'Due date must be set in the future';
       }
     }
 
@@ -68,225 +68,199 @@ const TaskForm = ({ isOpen, onClose, onSubmit, isSubmitting }) => {
 
   return (
     <>
-      {/* Backdrop overlay */}
-      <div style={styles.backdrop} onClick={onClose}></div>
+      {/* Backdrop overlay with blur */}
+      <div 
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(3, 5, 12, 0.7)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          zIndex: 1000,
+          animation: 'fadeIn 0.3s ease-out'
+        }} 
+        onClick={onClose}
+      ></div>
 
-      {/* Slide-out Drawer Panel */}
-      <div style={styles.drawer}>
-        <div style={styles.header}>
-          <h2>Create Smart Task</h2>
-          <button style={styles.closeBtn} onClick={onClose} title="Close drawer">✕</button>
+      {/* Slide-out Frosted Drawer Panel */}
+      <div className="frosted-drawer">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', paddingBottom: '1rem' }}>
+          <div>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '800', background: 'linear-gradient(135deg, #FFF 40%, #C084FC 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              Create Smart Task
+            </h2>
+            <p style={{ fontSize: '0.72rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '0.15rem' }}>
+              Server-side scoring active
+            </p>
+          </div>
+          <button 
+            style={{
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              borderRadius: '50%',
+              width: '32px',
+              height: '32px',
+              color: '#94A3B8',
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.25s ease'
+            }} 
+            onClick={onClose} 
+            title="Close drawer"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = '#FFF';
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)';
+              e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '#94A3B8';
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
+              e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+            }}
+          >
+            ✕
+          </button>
         </div>
 
-        <form onSubmit={handleFormSubmit} style={styles.form} noValidate>
+        <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.35rem', marginTop: '0.5rem' }} noValidate>
+          
           {/* Title input */}
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Task Title *</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+            <label style={{ fontSize: '0.72rem', fontWeight: '800', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Task Title <span style={{ color: 'var(--importance-5)' }}>*</span>
+            </label>
             <input
               type="text"
-              placeholder="e.g. Integrate Auth Service API"
+              placeholder="e.g. Implement OAuth Flow"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              className="form-input-premium"
               style={{
-                ...styles.input,
-                borderColor: errors.title ? 'rgba(239, 68, 68, 0.4)' : 'rgba(255, 255, 255, 0.08)',
-                boxShadow: errors.title ? '0 0 8px rgba(239, 68, 68, 0.15)' : 'none'
+                borderColor: errors.title ? 'rgba(239, 68, 68, 0.45)' : 'rgba(255, 255, 255, 0.08)',
+                boxShadow: errors.title ? '0 0 10px rgba(239, 68, 68, 0.15)' : 'none'
               }}
             />
             {errors.title && (
-              <span style={styles.errorText}>{errors.title}</span>
+              <span style={{ color: 'var(--importance-5)', fontSize: '0.72rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.15rem' }}>
+                ⚠️ {errors.title}
+              </span>
             )}
           </div>
 
-          {/* Importance ratings */}
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Importance Rating *</label>
+          {/* Importance ratings dropdown */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+            <label style={{ fontSize: '0.72rem', fontWeight: '800', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Importance Level <span style={{ color: 'var(--importance-5)' }}>*</span>
+            </label>
             <select
               value={importance}
               onChange={(e) => setImportance(e.target.value)}
+              className="form-input-premium"
               style={{
-                ...styles.select,
-                borderColor: errors.importance ? 'rgba(239, 68, 68, 0.4)' : 'rgba(255, 255, 255, 0.08)'
+                cursor: 'pointer',
+                borderColor: errors.importance ? 'rgba(239, 68, 68, 0.45)' : 'rgba(255, 255, 255, 0.08)'
               }}
             >
-              <option value="1">1 - Minor (Low priority impact)</option>
-              <option value="2">2 - Low</option>
-              <option value="3">3 - Medium</option>
-              <option value="4">4 - High</option>
-              <option value="5">5 - Critical (Triggers heavy scoring multiplier)</option>
+              <option value="1">1 - Minor Impact (Daily tasks)</option>
+              <option value="2">2 - Low Impact</option>
+              <option value="3">3 - Medium Impact (Regular operations)</option>
+              <option value="4">4 - High Impact</option>
+              <option value="5">5 - Critical Impact (Triggers heavy score multipliers)</option>
             </select>
             {errors.importance && (
-              <span style={styles.errorText}>{errors.importance}</span>
+              <span style={{ color: 'var(--importance-5)', fontSize: '0.72rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.15rem' }}>
+                ⚠️ {errors.importance}
+              </span>
             )}
           </div>
 
           {/* Date Picker */}
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Due Date *</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+            <label style={{ fontSize: '0.72rem', fontWeight: '800', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Due Date & Time <span style={{ color: 'var(--importance-5)' }}>*</span>
+            </label>
             <input
               type="datetime-local"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
+              className="form-input-premium"
               style={{
-                ...styles.input,
-                borderColor: errors.dueDate ? 'rgba(239, 68, 68, 0.4)' : 'rgba(255, 255, 255, 0.08)',
-                boxShadow: errors.dueDate ? '0 0 8px rgba(239, 68, 68, 0.15)' : 'none'
+                borderColor: errors.dueDate ? 'rgba(239, 68, 68, 0.45)' : 'rgba(255, 255, 255, 0.08)',
+                boxShadow: errors.dueDate ? '0 0 10px rgba(239, 68, 68, 0.15)' : 'none'
               }}
             />
             {errors.dueDate && (
-              <span style={styles.errorText}>{errors.dueDate}</span>
+              <span style={{ color: 'var(--importance-5)', fontSize: '0.72rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.15rem' }}>
+                ⚠️ {errors.dueDate}
+              </span>
             )}
           </div>
 
           {/* Description */}
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Description</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+            <label style={{ fontSize: '0.72rem', fontWeight: '800', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Description Context
+            </label>
             <textarea
-              placeholder="Provide context or instructions for this task..."
+              placeholder="Provide background context or task requirements..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
+              className="form-input-premium"
               style={{
-                ...styles.textarea,
-                borderColor: errors.description ? 'rgba(239, 68, 68, 0.4)' : 'rgba(255, 255, 255, 0.08)',
-                boxShadow: errors.description ? '0 0 8px rgba(239, 68, 68, 0.15)' : 'none'
+                resize: 'none',
+                borderColor: errors.description ? 'rgba(239, 68, 68, 0.45)' : 'rgba(255, 255, 255, 0.08)',
+                boxShadow: errors.description ? '0 0 10px rgba(239, 68, 68, 0.15)' : 'none'
               }}
             />
             {errors.description && (
-              <span style={styles.errorText}>{errors.description}</span>
+              <span style={{ color: 'var(--importance-5)', fontSize: '0.72rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.15rem' }}>
+                ⚠️ {errors.description}
+              </span>
             )}
           </div>
 
-          {/* Submit */}
+          {/* Submit Action */}
           <button 
             type="submit" 
-            className="primary" 
+            className="btn-premium btn-premium-primary" 
             disabled={isSubmitting}
-            style={styles.submitBtn}
+            style={{
+              width: '100%',
+              padding: '0.9rem',
+              fontSize: '0.92rem',
+              marginTop: '0.75rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.65rem'
+            }}
           >
             {isSubmitting ? (
               <>
                 <span className="spinner"></span>
-                Creating...
+                Creating task...
               </>
             ) : (
-              'Create Smart Task'
+              <>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Create Smart Task
+              </>
             )}
           </button>
         </form>
       </div>
     </>
   );
-};
-
-const styles = {
-  backdrop: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100vw',
-    height: '100vh',
-    background: 'rgba(5, 7, 12, 0.65)',
-    backdropFilter: 'blur(8px)',
-    zIndex: 1000,
-    animation: 'fadeIn 0.25s ease-out'
-  },
-  drawer: {
-    position: 'fixed',
-    top: 0,
-    right: 0,
-    width: '100%',
-    maxWidth: '440px',
-    height: '100vh',
-    background: '#0B101D',
-    borderLeft: '1px solid rgba(255, 255, 255, 0.06)',
-    boxShadow: '-10px 0 30px rgba(0, 0, 0, 0.4)',
-    padding: '2.25rem 1.5rem',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1.75rem',
-    zIndex: 1001,
-    overflowY: 'auto',
-    animation: 'slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  closeBtn: {
-    background: 'none',
-    border: 'none',
-    color: '#94A3B8',
-    fontSize: '1.25rem',
-    padding: '0.25rem',
-    cursor: 'pointer',
-    transition: 'color 0.2s ease',
-    outline: 'none'
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1.25rem'
-  },
-  formGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.45rem'
-  },
-  label: {
-    fontSize: '0.78rem',
-    fontWeight: '700',
-    color: '#94A3B8',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em'
-  },
-  input: {
-    background: 'rgba(255, 255, 255, 0.02)',
-    border: '1px solid rgba(255, 255, 255, 0.06)',
-    borderRadius: '10px',
-    padding: '0.8rem 0.95rem',
-    color: '#FFF',
-    fontFamily: 'inherit',
-    fontSize: '0.9rem',
-    outline: 'none',
-    transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
-  },
-  select: {
-    background: 'rgba(255, 255, 255, 0.02)',
-    border: '1px solid rgba(255, 255, 255, 0.06)',
-    borderRadius: '10px',
-    padding: '0.8rem 0.95rem',
-    color: '#FFF',
-    fontFamily: 'inherit',
-    fontSize: '0.9rem',
-    outline: 'none',
-    cursor: 'pointer'
-  },
-  textarea: {
-    background: 'rgba(255, 255, 255, 0.02)',
-    border: '1px solid rgba(255, 255, 255, 0.06)',
-    borderRadius: '10px',
-    padding: '0.8rem 0.95rem',
-    color: '#FFF',
-    fontFamily: 'inherit',
-    fontSize: '0.9rem',
-    outline: 'none',
-    resize: 'vertical',
-    transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
-  },
-  errorText: {
-    color: 'var(--importance-5)',
-    fontSize: '0.75rem',
-    fontWeight: '600',
-    marginTop: '0.15rem'
-  },
-  submitBtn: {
-    width: '100%',
-    padding: '0.85rem',
-    fontSize: '0.95rem',
-    marginTop: '0.5rem'
-  }
 };
 
 export default TaskForm;

@@ -177,29 +177,42 @@ function App() {
   };
 
   return (
-    <div style={styles.appContainer}>
-      {/* Toast Notification Banner */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2.25rem', minHeight: '80vh', position: 'relative' }}>
+      
+      {/* Toast Notification Capsule */}
       {toast && (
-        <div 
-          style={{
-            ...styles.toast,
-            backgroundColor: toast.type === 'error' ? 'rgba(239, 68, 68, 0.95)' : 'rgba(16, 185, 129, 0.95)',
-            boxShadow: toast.type === 'error' ? '0 10px 25px rgba(239, 68, 68, 0.25)' : '0 10px 25px rgba(16, 185, 129, 0.25)'
-          }}
-        >
-          <span>{toast.type === 'error' ? '🚫' : '✨'}</span>
-          <span style={{ fontWeight: '600' }}>{toast.message}</span>
+        <div className={`toast-capsule ${toast.type === 'error' ? 'toast-capsule-error' : 'toast-capsule-success'}`}>
+          <span style={{ fontSize: '1rem', display: 'inline-flex' }}>
+            {toast.type === 'error' ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--importance-5)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            )}
+          </span>
+          <span style={{ fontWeight: '700', fontSize: '0.85rem', letterSpacing: '0.01em' }}>{toast.message}</span>
         </div>
       )}
 
       {/* Header */}
-      <header style={styles.header}>
-        <div>
+      <header className="app-header">
+        <div className="logo-container">
           <h1>TaskFlow</h1>
-          <p style={styles.subtitle}>Smart Task Manager with Priority Scoring</p>
+          <div className="subtitle">
+            Smart Task Manager
+            <span className="subtitle-badge">Priority Scoring V1</span>
+          </div>
         </div>
-        <button className="primary" onClick={() => setIsFormOpen(true)} style={styles.newTaskBtn}>
-          <span style={{ fontSize: '1.25rem', marginRight: '0.2rem' }}>+</span>
+        <button className="btn-premium btn-premium-primary" onClick={() => setIsFormOpen(true)}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
           New Task
         </button>
       </header>
@@ -208,20 +221,15 @@ function App() {
       <Dashboard stats={stats} loading={loading} />
 
       {/* Controls / Filtering section */}
-      <div style={styles.controlsRow}>
+      <div className="controls-panel">
         {/* Status filtering tabs */}
-        <div style={styles.filterGroup}>
-          <span style={styles.filterLabel}>Show Status:</span>
+        <div className="filter-btn-group">
+          <span className="filter-label" style={{ fontSize: '0.75rem', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: '0.5rem' }}>Show Status:</span>
           {['all', 'pending', 'completed'].map((status) => (
             <button
               key={status}
               onClick={() => handleStatusFilterChange(status)}
-              style={{
-                ...styles.filterBtn,
-                backgroundColor: statusFilter === status ? 'rgba(139, 92, 246, 0.12)' : 'transparent',
-                borderColor: statusFilter === status ? 'var(--accent-purple)' : 'rgba(255, 255, 255, 0.06)',
-                color: statusFilter === status ? '#FFF' : '#94A3B8',
-              }}
+              className={`filter-btn ${statusFilter === status ? 'filter-btn-active' : ''}`}
             >
               {status}
             </button>
@@ -229,42 +237,47 @@ function App() {
         </div>
 
         {/* Minimum Importance Slider */}
-        <div style={styles.sliderGroup}>
-          <span style={styles.filterLabel}>Min Importance: {minImportance}⭐</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
+          <span className="filter-label" style={{ fontSize: '0.75rem', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            Min Importance: <strong style={{ color: '#CBD5E1', marginLeft: '0.15rem' }}>{minImportance}⭐</strong>
+          </span>
           <input
             type="range"
             min="1"
             max="5"
             value={minImportance}
             onChange={(e) => handleMinImportanceChange(e.target.value)}
-            style={styles.slider}
+            className="custom-slider"
           />
         </div>
       </div>
 
       {/* Task Grid lists */}
       {error ? (
-        <div style={styles.errorContainer}>
-          <div style={{ fontSize: '3rem' }}>🔌</div>
-          <h2>Server Connection Error</h2>
-          <p style={{ color: '#94A3B8' }}>{error}</p>
-          <button style={{ marginTop: '1rem' }} onClick={loadData}>Retry Connection</button>
+        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '1.25rem', padding: '5rem 2rem', border: '1px dashed rgba(239, 68, 68, 0.25)', textAlign: 'center', background: 'rgba(239, 68, 68, 0.02)' }}>
+          <div style={{ fontSize: '3rem', filter: 'drop-shadow(0 0 10px rgba(239,68,68,0.4))' }}>🔌</div>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: '800' }}>Server Connection Offline</h2>
+          <p style={{ color: '#94A3B8', fontSize: '0.9rem', maxWidth: '400px', lineHeight: '1.5' }}>{error}</p>
+          <button className="btn-premium btn-premium-secondary" style={{ marginTop: '0.5rem' }} onClick={loadData}>
+            Retry Connection
+          </button>
         </div>
       ) : loading ? (
-        <div style={styles.loadingContainer}>
-          <div className="spinner" style={styles.mainSpinner}></div>
-          <p style={{ color: '#94A3B8', fontWeight: '500' }}>Loading smart tasks and analytics...</p>
+        <div className="tasks-layout-grid">
+          {[1, 2, 3].map(idx => (
+            <div key={idx} className="glass-card shimmer-bg" style={{ height: '220px', border: '1px solid rgba(255,255,255,0.03)' }}></div>
+          ))}
         </div>
       ) : tasks.length === 0 ? (
-        <div style={styles.emptyContainer}>
-          <div style={{ fontSize: '2.5rem' }}>✨</div>
-          <h3>No tasks found</h3>
-          <p style={{ color: '#64748B', fontSize: '0.85rem' }}>
-            No tasks match the active filter criteria. Clear filters or create a new task to get started!
+        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '0.85rem', padding: '5.5rem 2rem', border: '2px dashed rgba(255, 255, 255, 0.03)', textAlign: 'center', maxWidth: '450px', margin: '2rem auto', background: 'transparent' }}>
+          <div style={{ fontSize: '2.5rem', filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.2))' }}>✨</div>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: '800' }}>No Tasks Active</h3>
+          <p style={{ color: '#64748B', fontSize: '0.85rem', lineHeight: '1.4' }}>
+            No tasks match the active filters or slider specifications. Try broadening your criteria or initialize a new record.
           </p>
         </div>
       ) : (
-        <div style={styles.taskGrid}>
+        <div className="tasks-layout-grid">
           {tasks.map(task => (
             <TaskCard
               key={task._id}
@@ -286,138 +299,5 @@ function App() {
     </div>
   );
 }
-
-const styles = {
-  appContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1.5rem',
-    minHeight: '80vh'
-  },
-  toast: {
-    position: 'fixed',
-    top: '24px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    zIndex: 2000,
-    padding: '0.95rem 1.6rem',
-    borderRadius: '12px',
-    color: '#FFF',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    backdropFilter: 'blur(12px)',
-    animation: 'fadeIn 0.2s ease-out'
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
-    paddingBottom: '1rem'
-  },
-  subtitle: {
-    color: '#94A3B8',
-    fontSize: '0.92rem',
-    fontWeight: '500',
-    marginTop: '0.2rem'
-  },
-  newTaskBtn: {
-    padding: '0.75rem 1.45rem'
-  },
-  controlsRow: {
-    background: 'rgba(255, 255, 255, 0.01)',
-    border: '1px solid rgba(255, 255, 255, 0.03)',
-    borderRadius: '14px',
-    padding: '0.85rem 1.25rem',
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: '1rem'
-  },
-  filterGroup: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    flexWrap: 'wrap'
-  },
-  filterLabel: {
-    fontSize: '0.78rem',
-    fontWeight: '700',
-    color: '#64748B',
-    textTransform: 'uppercase',
-    letterSpacing: '0.06em',
-    marginRight: '0.5rem'
-  },
-  filterBtn: {
-    textTransform: 'capitalize',
-    padding: '0.4rem 0.95rem',
-    fontSize: '0.8rem',
-    border: '1px solid transparent',
-    borderRadius: '8px'
-  },
-  sliderGroup: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-    flexWrap: 'wrap'
-  },
-  slider: {
-    cursor: 'pointer',
-    width: '120px',
-    accentColor: 'var(--accent-purple)'
-  },
-  taskGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))',
-    gap: '1.25rem',
-    alignItems: 'stretch'
-  },
-  errorContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: '1rem',
-    padding: '4.5rem 1rem',
-    background: 'rgba(239, 68, 68, 0.01)',
-    border: '1px dashed rgba(239, 68, 68, 0.18)',
-    borderRadius: '16px',
-    textAlign: 'center'
-  },
-  loadingContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: '1rem',
-    padding: '6.5rem 1rem',
-    background: 'rgba(255, 255, 255, 0.005)',
-    border: '1px dashed rgba(255, 255, 255, 0.04)',
-    borderRadius: '16px'
-  },
-  mainSpinner: {
-    width: '44px',
-    height: '44px',
-    borderWidth: '3.5px',
-    borderTopColor: 'var(--accent-purple)'
-  },
-  emptyContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: '0.5rem',
-    padding: '5rem 2rem',
-    background: 'rgba(255, 255, 255, 0.005)',
-    border: '2px dashed rgba(255, 255, 255, 0.03)',
-    borderRadius: '16px',
-    textAlign: 'center',
-    maxWidth: '450px',
-    margin: '1.5rem auto'
-  }
-};
 
 export default App;

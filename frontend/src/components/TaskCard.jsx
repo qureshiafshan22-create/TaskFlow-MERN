@@ -24,102 +24,195 @@ const TaskCard = ({ task, onToggleStatus, onDelete }) => {
   const isOverdue = status === 'pending' && new Date(dueDate) < new Date();
   const isHighPriority = priorityScore >= 50;
 
-  const renderStars = (lvl) => {
-    return '★'.repeat(lvl) + '☆'.repeat(5 - lvl);
+  // Custom golden gradient SVG stars
+  const renderSVGStars = (lvl) => {
+    return (
+      <div style={{ display: 'inline-flex', gap: '0.15rem' }}>
+        {[1, 2, 3, 4, 5].map((starIdx) => {
+          const filled = starIdx <= lvl;
+          return (
+            <svg
+              key={starIdx}
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill={filled ? "url(#goldGradient)" : "none"}
+              stroke={filled ? "none" : "rgba(255, 255, 255, 0.25)"}
+              strokeWidth="1.5"
+              style={{
+                filter: filled ? 'drop-shadow(0 0 3px rgba(245, 158, 11, 0.45))' : 'none',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              <defs>
+                <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#FDE047" />
+                  <stop offset="50%" stopColor="#F59E0B" />
+                  <stop offset="100%" stopColor="#D97706" />
+                </linearGradient>
+              </defs>
+              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+            </svg>
+          );
+        })}
+      </div>
+    );
   };
 
-  const getImportanceColor = (lvl) => {
-    const colors = {
-      "5": 'var(--importance-5)',
-      "4": 'var(--importance-4)',
-      "3": 'var(--importance-3)',
-      "2": 'var(--importance-2)',
-      "1": 'var(--importance-1)'
+  const getImportanceLabel = (lvl) => {
+    const labels = {
+      "5": 'Critical',
+      "4": 'High',
+      "3": 'Medium',
+      "2": 'Low',
+      "1": 'Minor'
     };
-    return colors[String(lvl)] || '#CBD5E1';
+    return labels[String(lvl)] || 'Normal';
   };
 
   return (
-    <div style={{
-      ...styles.card,
-      borderColor: isHighPriority 
-        ? (isOverdue ? 'rgba(239, 68, 68, 0.45)' : 'rgba(139, 92, 246, 0.45)') 
-        : 'rgba(255, 255, 255, 0.05)',
-      boxShadow: isHighPriority 
-        ? (isOverdue ? '0 0 15px rgba(239, 68, 68, 0.08)' : '0 0 15px rgba(139, 92, 246, 0.08)') 
-        : 'none',
-      backgroundColor: status === 'completed' ? 'rgba(22, 28, 45, 0.25)' : 'var(--bg-card)'
-    }}>
+    <div
+      className={`glass-card task-card ${
+        status === 'completed'
+          ? ''
+          : isOverdue
+          ? 'task-card-overdue'
+          : isHighPriority
+          ? 'task-card-high-priority'
+          : ''
+      }`}
+      style={{
+        backgroundColor: status === 'completed' ? 'rgba(15, 23, 42, 0.15)' : 'var(--bg-card)',
+        borderColor: status === 'completed'
+          ? 'rgba(255, 255, 255, 0.02)'
+          : isHighPriority
+          ? (isOverdue ? 'rgba(239, 68, 68, 0.45)' : 'rgba(139, 92, 246, 0.45)')
+          : 'rgba(255, 255, 255, 0.05)',
+        opacity: status === 'completed' ? 0.65 : 1,
+        transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+      }}
+    >
       {/* Top badges bar */}
-      <div style={styles.badgeBar}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.85rem' }}>
         {/* Stars */}
-        <span 
-          style={{ ...styles.starsBadge, color: getImportanceColor(importance) }}
-          title={`Importance Level ${importance}/5`}
-        >
-          {renderStars(importance)}
-        </span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+          {renderSVGStars(importance)}
+          <span style={{ fontSize: '0.62rem', fontWeight: '800', color: '#64748B', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+            {getImportanceLabel(importance)} impact
+          </span>
+        </div>
 
         {/* Priority Score & High Priority tag */}
-        <div style={styles.scoreRow}>
-          {isHighPriority && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {status === 'pending' && isHighPriority && (
             <span style={{
-              ...styles.highlightTag,
-              backgroundColor: isOverdue ? 'rgba(239, 68, 68, 0.1)' : 'rgba(139, 92, 246, 0.1)',
-              color: isOverdue ? 'var(--importance-5)' : 'var(--accent-purple)',
-              borderColor: isOverdue ? 'rgba(239, 68, 68, 0.25)' : 'rgba(139, 92, 246, 0.25)'
+              fontSize: '0.6rem',
+              fontWeight: '900',
+              padding: '0.2rem 0.5rem',
+              borderRadius: '8px',
+              letterSpacing: '0.04em',
+              background: isOverdue ? 'rgba(239, 68, 68, 0.12)' : 'rgba(139, 92, 246, 0.15)',
+              color: isOverdue ? 'var(--importance-5)' : '#C084FC',
+              border: `1px solid ${isOverdue ? 'rgba(239, 68, 68, 0.3)' : 'rgba(139, 92, 246, 0.3)'}`,
+              boxShadow: `0 0 10px ${isOverdue ? 'rgba(239, 68, 68, 0.1)' : 'rgba(139, 92, 246, 0.15)'}`
             }}>
               🚨 HIGH PRIORITY
             </span>
           )}
-          <span style={styles.scoreBadge} title="Priority score computed dynamically by server">
-            Score: <strong style={{ color: isHighPriority ? 'var(--importance-4)' : '#FFF' }}>{priorityScore.toFixed(2)}</strong>
+          <span 
+            style={{
+              fontSize: '0.72rem',
+              color: '#CBD5E1',
+              backgroundColor: 'rgba(255, 255, 255, 0.03)',
+              padding: '0.25rem 0.6rem',
+              borderRadius: '8px',
+              border: '1px solid rgba(255, 255, 255, 0.04)',
+              fontWeight: '600'
+            }} 
+            title="Priority score computed dynamically by server based on Importance and Days Until Due"
+          >
+            Score: <strong style={{ color: status === 'completed' ? '#64748B' : isHighPriority ? 'var(--accent-gold)' : '#FFF', fontSize: '0.75rem', fontWeight: '800' }}>{priorityScore.toFixed(2)}</strong>
           </span>
         </div>
       </div>
 
       {/* Title & Description */}
-      <div style={styles.contentSection}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flexGrow: 1, marginBottom: '1.25rem' }}>
         <h3 style={{
-          ...styles.title,
+          fontSize: '1.1rem',
+          fontWeight: '800',
+          lineHeight: '1.3',
           textDecoration: status === 'completed' ? 'line-through' : 'none',
-          color: status === 'completed' ? '#64748B' : '#FFF'
+          color: status === 'completed' ? '#475569' : '#FFFFFF',
+          letterSpacing: '-0.02em',
+          wordBreak: 'break-word'
         }}>
           {title}
         </h3>
-        {description && (
+        {description ? (
           <p style={{
-            ...styles.description,
-            color: status === 'completed' ? '#475569' : '#94A3B8'
+            fontSize: '0.85rem',
+            lineHeight: '1.45',
+            color: status === 'completed' ? '#334155' : '#94A3B8',
+            wordBreak: 'break-word',
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
           }}>
             {description}
           </p>
+        ) : (
+          <p style={{ fontSize: '0.8rem', fontStyle: 'italic', color: 'rgba(255, 255, 255, 0.15)' }}>No description provided</p>
         )}
       </div>
 
       {/* Due Date & Action controls footer */}
-      <div style={styles.footer}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+        paddingTop: '0.85rem',
+        flexWrap: 'wrap',
+        gap: '0.85rem'
+      }}>
         {/* Humanized Date Indicator */}
-        <div style={styles.dateSection}>
-          <span style={styles.dateLabel}>Due:</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.78rem' }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={status === 'completed' ? '#475569' : isOverdue ? 'var(--importance-5)' : '#94A3B8'} strokeWidth="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span style={{ color: status === 'completed' ? '#475569' : '#64748B', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Due:</span>
           <span style={{
-            ...styles.dateValue,
-            color: isOverdue ? 'var(--importance-5)' : (status === 'completed' ? '#64748B' : '#CBD5E1'),
-            fontWeight: isOverdue ? '700' : '500'
+            color: status === 'completed' 
+              ? '#475569' 
+              : isOverdue 
+              ? 'var(--importance-5)' 
+              : 'var(--accent-cyan)',
+            fontWeight: isOverdue && status === 'pending' ? '800' : '600',
+            textTransform: 'lowercase',
+            filter: isOverdue && status === 'pending' ? 'drop-shadow(0 0 4px rgba(239,68,68,0.25))' : 'none'
           }}>
             {formatHumanDate(dueDate)}
           </span>
         </div>
 
         {/* Action Controls */}
-        <div style={styles.actionButtons}>
+        <div style={{ display: 'flex', gap: '0.45rem' }}>
           {status === 'pending' && (
             <button
               onClick={() => onToggleStatus(_id, 'completed')}
-              style={styles.completeBtn}
+              className="btn-premium-complete"
               title="Mark task as complete"
             >
-              ✓ Complete
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Complete
             </button>
           )}
           <button
@@ -128,121 +221,19 @@ const TaskCard = ({ task, onToggleStatus, onDelete }) => {
                 onDelete(_id);
               }
             }}
-            style={styles.deleteBtn}
+            className="btn-premium-delete"
             title="Delete task"
           >
-            ✕ Delete
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            Delete
           </button>
         </div>
       </div>
     </div>
   );
-};
-
-const styles = {
-  card: {
-    border: '1px solid transparent',
-    borderRadius: '12px',
-    padding: '1.15rem',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.85rem',
-    transition: 'all 0.25s ease',
-    position: 'relative'
-  },
-  badgeBar: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: '0.5rem'
-  },
-  starsBadge: {
-    fontSize: '0.75rem',
-    letterSpacing: '0.1em',
-    fontWeight: '800'
-  },
-  scoreRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem'
-  },
-  highlightTag: {
-    fontSize: '0.62rem',
-    fontWeight: '800',
-    padding: '0.15rem 0.45rem',
-    borderRadius: '6px',
-    border: '1px solid transparent',
-    letterSpacing: '0.04em'
-  },
-  scoreBadge: {
-    fontSize: '0.7rem',
-    color: '#94A3B8',
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-    padding: '0.2rem 0.5rem',
-    borderRadius: '6px',
-    border: '1px solid rgba(255, 255, 255, 0.03)'
-  },
-  contentSection: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.25rem'
-  },
-  title: {
-    fontSize: '1.05rem',
-    fontWeight: '700',
-    lineHeight: '1.3'
-  },
-  description: {
-    fontSize: '0.82rem',
-    lineHeight: '1.4',
-    wordBreak: 'break-word'
-  },
-  footer: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderTop: '1px solid rgba(255, 255, 255, 0.04)',
-    paddingTop: '0.75rem',
-    marginTop: '0.15rem',
-    flexWrap: 'wrap',
-    gap: '0.75rem'
-  },
-  dateSection: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.3rem',
-    fontSize: '0.75rem'
-  },
-  dateLabel: {
-    color: '#64748B',
-    fontWeight: '600'
-  },
-  dateValue: {
-    textTransform: 'lowercase'
-  },
-  actionButtons: {
-    display: 'flex',
-    gap: '0.4rem'
-  },
-  completeBtn: {
-    fontSize: '0.72rem',
-    padding: '0.35rem 0.7rem',
-    color: '#06B6D4',
-    backgroundColor: 'rgba(6, 182, 212, 0.08)',
-    border: '1px solid rgba(6, 182, 212, 0.25)',
-    borderRadius: '8px',
-    height: '28px'
-  },
-  deleteBtn: {
-    fontSize: '0.72rem',
-    padding: '0.35rem 0.7rem',
-    color: '#64748B',
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-    border: '1px solid rgba(255, 255, 255, 0.04)',
-    borderRadius: '8px',
-    height: '28px'
-  }
 };
 
 export default TaskCard;
